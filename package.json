@@ -1,0 +1,14 @@
+{
+	"name": "stremio-addon-OnlyStream",
+	"version": "0.0.1",
+	"description": "Returns only one stream result per movie/episode, which automatically picks the most reliable source, or cycles through the most promising.",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"stremio-addon-sdk": "1.1.x",
+		"webtorrent": "^3.0.21"
+	},
+	
+	"type": "module"
+}

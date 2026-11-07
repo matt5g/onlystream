@@ -1,0 +1,12 @@
+{
+    "allowedResolutions": ["1080p", "720p", "480p"],
+    "preferredResolution": "1080p",
+    "includeHTTPStreams": false,
+    "peerLimit": 500,
+    "minPeers": 3,
+    "maxConcurrentProbes": 5,
+    "addonUrls": [
+        ""
+    ]
+
+}
