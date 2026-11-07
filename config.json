@@ -6,7 +6,7 @@
     "minPeers": 3,
     "maxConcurrentProbes": 5,
     "addonUrls": [
-        ""
+        
     ]
 
 }

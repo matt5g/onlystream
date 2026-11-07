@@ -14,9 +14,12 @@ const manifest = {
 	"description": "wip"
 }
 const builder = new addonBuilder(manifest)
-
-const addonUrls = config.addonUrls;
-let streams = [];
+try {
+    process.loadEnvFile();
+} catch (err) {
+    console.warn("No .env file found, proceeding without it.");
+}
+const addonUrls = config.addonUrls.length !== 0 ? config.addonUrls : process.env.ADDON_URLS?.split(',');
 builder.defineStreamHandler(async ({ type, id }) => {
     const results = await Promise.allSettled(
         addonUrls.map(async (manifestUrl) => {
@@ -36,7 +39,7 @@ builder.defineStreamHandler(async ({ type, id }) => {
         })
     );
 	
-    streams = results
+    let streams = results
         .filter(result => result.status === 'fulfilled')
         .flatMap(result => result.value);
 	
