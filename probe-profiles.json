@@ -1,0 +1,14 @@
+{
+    "fast": {
+        "default": true,
+        "failbackStreamCount": 2,
+        "probeTimeout": 8000,
+        "maxConcurrentProbes": 5
+    },
+    "aggressive": {
+        "default": false,
+        "failbackStreamCount": 5,
+        "probeTimeout": 12000,
+        "maxConcurrentProbes": 10
+    }
+}

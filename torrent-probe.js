@@ -1,9 +1,11 @@
 import WebTorrent from 'webtorrent';
 import config from './config.json' with { type: 'json' };
+import ProbeConditions from './probe-conditions.js';
 const client = new WebTorrent();
 
-const PROBE_TIMEOUT = 8000;
-const MAX_CONCURRENT = config.maxConcurrentProbes;
+const probeConditions = new ProbeConditions();
+const PROBE_TIMEOUT = probeConditions.probeTimeout;
+const MAX_CONCURRENT = probeConditions.maxConcurrentProbes;
 
 function probeOne(infoHash) {
     return new Promise(resolve => {

@@ -1,30 +1,41 @@
 import config from "./config.json" with { type: "json" };
+import ProbeConditions from "./probe-conditions.js";
 import probe from "./torrent-probe.js";
+import { blacklistInstance } from "./blacklist-mgr.js"
 //import { probe } from "./torrent-probe.js";
 let streamInt = 0
 let topStreams = []
+let lastStream = {}
 const getPeers = function(stream) {
     if (!stream || !stream.description) {
         return 0;
     }
     stream.peers = Number(stream.description.match(/🌱 (\d+)/)?.[1] ?? 0);
-    
+    // note for future, torrentio uses the emoji 👤
     return stream.peers;
 };
 
+// use eastern/central time to determine how aggressive to be with probing
+// torrents evidently have less peers later in the night, given that my addon was working perfectly at 6pm and now at 2am it wont do shit
 
-const sortStreams = function(streams) {
+const sortStreams = async function(streams) {
+    let blacklist = await blacklistInstance.create();
     if (!streams || streams.length === 0) {
         return [];
     }
+    
+    console.log(blacklist)
     const torrentStreams = streams
         .filter(stream => stream.description.includes("🌱"))
         .sort((a, b) => getPeers(b) - getPeers(a))
         .filter(stream => stream.peers <= config.peerLimit)
+        .filter(stream => !blacklist.includes(stream.infoHash))
     
     for (const stream of torrentStreams) {
         delete stream.peers;
+        
     }
+    
     const theRest = streams
         .filter(stream => !stream.description.includes("🌱"))
         .filter(stream =>
@@ -36,26 +47,17 @@ const sortStreams = function(streams) {
     const sortedStreams = config.includeHTTPStreams ? [...torrentStreams, ...theRest] : [...torrentStreams];
     return sortedStreams;
 };
-const topHlfDzn = function(streams) {
-    if (!streams || streams.length === 0) {
-        return [];
-    }
-    const sortedStreams = sortStreams(streams);
-    for (let i = 0; i <= config.maxConcurrentProbes; i++) {
-        topStreams[i] = sortedStreams[i];
-    }
-    return topStreams;
 
-}
 
 const findBestStream = async function(streams) {
     if (!streams || streams.length === 0) {
         return null;
     }
+    const probeConditions = new ProbeConditions();
 
-    const sortedStreams = sortStreams(streams);
+    const sortedStreams = await sortStreams(streams);
 
-    const initialCount = config.maxConcurrentProbes;
+    const initialCount = probeConditions.maxConcurrentProbes;
     let contenders = sortedStreams.slice(0, initialCount);
 
     if (contenders.length === 0) return null;
@@ -88,7 +90,7 @@ const findBestStream = async function(streams) {
     if (bestPeers < config.minPeers) {
         const newContenders = sortedStreams.slice(
             initialCount,
-            initialCount + 2
+            initialCount + probeConditions.failbackStreamCount
         );
 
         if (newContenders.length > 0) {
@@ -112,8 +114,11 @@ const findBestStream = async function(streams) {
     );
 
     bestStream.name = "⭐ OnlyStream Recommended\n" + bestStream.name;
-
+    lastStream = bestStream
     return bestStream;
 };
+const getLastStream = function() {
+    return lastStream
+}
 
-export { sortStreams, findBestStream, topStreams };
+export { sortStreams, findBestStream, getLastStream };

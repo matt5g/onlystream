@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlyStream Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>OnlyStream Configuration</h1>
+    <form id="configForm">
+        <label for="allowedResolutions">Allowed Resolutions (comma-separated):</label>
+        <input type="text" id="allowedResolutions" name="allowedResolutions" value="1080p,720p,480p">
+
+        <label for="preferredResolution">Preferred Resolution:</label>
+        <input type="text" id="preferredResolution" name="preferredResolution" value="1080p">
+
+        <label for="includeHTTPStreams">Include HTTP Streams:</label>
+        <input type="checkbox" id="includeHTTPStreams" name="includeHTTPStreams">
+
+        <label for="peerLimit">Peer Limit:</label>
+        <input type="number" id="peerLimit" name="peerLimit" value="500">
+
+        <label for="minPeers">Minimum Peers:</label>
+        <input type="number" id="minPeers" name="minPeers" value="3">
+
+        <label for="maxConcurrentProbes">Max Concurrent Probes:</label>
+        <input type="number" id="maxConcurrentProbes" name="maxConcurrentProbes" value="5">
+
+        <label for="addonUrls">Addon URLs (comma-separated):</label>
+        <input type="text" id="addonUrls" name="addonUrls" value="">
+        
+        <button type="submit">Save Configuration</button>
+    </form>
+
+    <script>
+        document.getElementById('configForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const config = {
+                allowedResolutions: document.getElementById('allowedResolutions').value.split(',').map(res => res.trim()),
+                preferredResolution: document.getElementById('preferredResolution').value,
+                includeHTTPStreams: document.getElementById('includeHTTPStreams').checked,
+                peerLimit: parseInt(document.getElementById('peerLimit').value),
+                minPeers: parseInt(document.getElementById('minPeers').value),
+                maxConcurrentProbes: parseInt(document.getElementById('maxConcurrentProbes').value),
+                addonUrls: document.getElementById('addonUrls').value.split(',').map(url => url.trim())
+            };
+            console.log('Configuration saved:', config);
+            fetch("/save-config", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ port: 8000 })
+            });
+
+            // Here you can add code to save the configuration to a file or send it to a server
+        });
+    </script>
+</body>
+</html>
